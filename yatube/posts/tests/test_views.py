@@ -308,7 +308,8 @@ class PostCreateImageTest(TestCase):
     def test_profile_image_context(self):
         """В context шаблона profile передана картинка."""
         post = PostCreateImageTest.post
-        response = self.authorized_client.get(reverse('posts:profile', kwargs={'username': f'{post.author}'}))
+        rvrs = reverse('posts:profile', kwargs={'username': f'{post.author}'})
+        response = self.authorized_client.get(rvrs)
         first_object = response.context['page_obj'][0]
         self.assertEqual(post.image, first_object.image)
 
@@ -316,13 +317,15 @@ class PostCreateImageTest(TestCase):
         """В context шаблона group передана картинка."""
         post = PostCreateImageTest.post
         group = PostCreateImageTest.group
-        response = self.authorized_client.get(reverse('posts:group_list', kwargs={'slug': f'{group.slug}'}))
+        rvrs = reverse('posts:group_list', kwargs={'slug': f'{group.slug}'})
+        response = self.authorized_client.get(rvrs)
         first_object = response.context['page_obj'][0]
         self.assertEqual(post.image, first_object.image)
 
     def test_detail_image_context(self):
         """В context шаблона post_detail передана картинка."""
         post = PostCreateImageTest.post
-        response = self.authorized_client.get(reverse('posts:post_detail', kwargs={'post_id': f'{post.pk}'}))
+        rvrs = reverse('posts:post_detail', kwargs={'post_id': f'{post.pk}'})
+        response = self.authorized_client.get(rvrs)
         first_object = response.context['post']
         self.assertEqual(post.image, first_object.image)

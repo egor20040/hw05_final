@@ -49,16 +49,15 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     sub = True
+    following = False
     try:
-        request.user.follower.get(author=author)
-        following = True
-    except:
+        if author.following.filter(user=request.user):
+            following = True
+    except TypeError:
         following = False
 
     if author == request.user:
         sub = False
-
-        following = True
 
     title = f'Профайл пользователя {username}'
 
