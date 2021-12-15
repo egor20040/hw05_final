@@ -25,14 +25,14 @@ class TaskPagesTests(TestCase):
             slug='test-slug',
             description='Тестовое описание',
         )
-        cls.post = Post.objects.create(
-            author=cls.user,
+        cls.post1 = Post.objects.create(
+            author=cls.user1,
             text='Тестовая группа',
             group=cls.group
         )
-        cls.post1 = Post.objects.create(
-            author=cls.user1,
-            text='Тестовая группа 1',
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='Тестовая группа',
             group=cls.group
         )
         cls.comment = Comment.objects.create(
