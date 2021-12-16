@@ -122,6 +122,3 @@ class TaskURLTests(TestCase):
             f'/profile/{user.username}/unfollow/'
         )
         self.assertRedirects(response, f'/profile/{user.username}/')
-
-
-
