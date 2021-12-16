@@ -103,14 +103,24 @@ class TaskURLTests(TestCase):
         """Страница /comment/ доступна авторизованному пользователю."""
         post = TaskURLTests.post
         response = self.guest_client.get(f'/posts/{post.pk}/comment/')
-        self.assertRedirects(response, f'/auth/login/?next=/posts/{post.pk}/comment/')
+        self.assertRedirects(
+            response,
+            f'/auth/login/?next=/posts/{post.pk}/comment/'
+        )
 
     def test_user_follow_url(self):
         """Страница /follow/ доступна авторизованному пользователю."""
         user = TaskURLTests.user
-        response = self.authorized_client.get(f'/profile/{user.username}/follow/')
-        self.assertRedirects(response, f'/profile/{user.username}/')
-        response = self.authorized_client.get(f'/profile/{user.username}/unfollow/')
+        response = self.authorized_client.get(
+            f'/profile/{user.username}/follow/'
+        )
+        self.assertRedirects(
+            response,
+            f'/profile/{user.username}/'
+        )
+        response = self.authorized_client.get(
+            f'/profile/{user.username}/unfollow/'
+        )
         self.assertRedirects(response, f'/profile/{user.username}/')
 
 

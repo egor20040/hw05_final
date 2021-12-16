@@ -59,7 +59,7 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response, reverse('posts:profile',
-                                               kwargs={'username': f'{post.author}'}))
+                             kwargs={'username': f'{post.author}'}))
         self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertTrue(
             Post.objects.filter(
@@ -80,7 +80,7 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response, reverse('posts:post_detail',
-                                               kwargs={'post_id': f'{post.pk}'}))
+                             kwargs={'post_id': f'{post.pk}'}))
         self.assertEqual(Post.objects.count(), post_count)
         self.assertTrue(
             Post.objects.filter(
@@ -101,8 +101,8 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response, reverse('posts:post_detail',
-                                               kwargs={'post_id': f'{post.pk}'}))
-        self.assertEqual(Post.objects.count(), comment_count+1)
+                             kwargs={'post_id': f'{post.pk}'}))
+        self.assertEqual(Post.objects.count(), comment_count + 1)
         self.assertTrue(
             Comment.objects.filter(
                 text='Тестовый коментарий',
