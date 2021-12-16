@@ -50,11 +50,10 @@ def profile(request, username):
     page_obj = paginator.get_page(page_number)
     sub = True
     following = False
-    try:
+
+    if request.user.is_authenticated:
         if author.following.filter(user=request.user):
             following = True
-    except TypeError:
-        following = False
 
     if author == request.user:
         sub = False
@@ -154,13 +153,8 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    followers = request.user.follower.all()
     template = 'posts/follow.html'
-    post_list = Post.objects.none()
-
-    for follower in followers:
-        post = Post.objects.filter(author=follower.author)
-        post_list = post_list | post
+    post_list = Post.objects.filter(author__following__user=request.user).all()
 
     paginator = Paginator(post_list, settings.PER_PAGE)
     page_number = request.GET.get('page')
@@ -179,17 +173,17 @@ def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     if request.user == author:
         return redirect('posts:profile', username=username)
-    elif author.following.filter(user=request.user):
-        return redirect('posts:profile', username=username)
-    else:
-        Follow.objects.create(user=request.user, author=author)
-        return redirect('posts:profile', username=username)
+
+    Follow.objects.get_or_create(user=request.user, author=author)
+    return redirect('posts:profile', username=username)
 
 
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    author.following.get(user=request.user).delete()
+    if author.following.filter(user=request.user).exists():
+        author.following.get(user=request.user).delete()
+
     return redirect('posts:profile', username=username)
 
 

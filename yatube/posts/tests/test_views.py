@@ -25,13 +25,13 @@ class TaskPagesTests(TestCase):
             slug='test-slug',
             description='Тестовое описание',
         )
-        cls.post1 = Post.objects.create(
-            author=cls.user1,
+        cls.post = Post.objects.create(
+            author=cls.user,
             text='Тестовая группа',
             group=cls.group
         )
-        cls.post = Post.objects.create(
-            author=cls.user,
+        cls.post1 = Post.objects.create(
+            author=cls.user1,
             text='Тестовая группа',
             group=cls.group
         )
@@ -274,7 +274,6 @@ class PostCreateImageTest(TestCase):
             content=small_gif,
             content_type='image/gif'
         )
-        # Создаем запись в базе данных для проверки сушествующего slug
         cls.user = User.objects.create_user(username='auth')
         cls.group = Group.objects.create(
             title='Тестовая группа',
@@ -308,8 +307,7 @@ class PostCreateImageTest(TestCase):
     def test_profile_image_context(self):
         """В context шаблона profile передана картинка."""
         post = PostCreateImageTest.post
-        rvrs = reverse('posts:profile', kwargs={'username': f'{post.author}'})
-        response = self.authorized_client.get(rvrs)
+        response = self.authorized_client.get(reverse('posts:profile', kwargs={'username': f'{post.author}'}))
         first_object = response.context['page_obj'][0]
         self.assertEqual(post.image, first_object.image)
 
@@ -317,15 +315,89 @@ class PostCreateImageTest(TestCase):
         """В context шаблона group передана картинка."""
         post = PostCreateImageTest.post
         group = PostCreateImageTest.group
-        rvrs = reverse('posts:group_list', kwargs={'slug': f'{group.slug}'})
-        response = self.authorized_client.get(rvrs)
+        response = self.authorized_client.get(reverse('posts:group_list', kwargs={'slug': f'{group.slug}'}))
         first_object = response.context['page_obj'][0]
         self.assertEqual(post.image, first_object.image)
 
     def test_detail_image_context(self):
         """В context шаблона post_detail передана картинка."""
         post = PostCreateImageTest.post
-        rvrs = reverse('posts:post_detail', kwargs={'post_id': f'{post.pk}'})
-        response = self.authorized_client.get(rvrs)
+        response = self.authorized_client.get(reverse('posts:post_detail', kwargs={'post_id': f'{post.pk}'}))
         first_object = response.context['post']
         self.assertEqual(post.image, first_object.image)
+
+
+class CommentCreateTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.user = User.objects.create_user(username='auth')
+        cls.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test-slug',
+            description='Тестовое описание',
+        )
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='Тестовая группа',
+            group=cls.group,
+        )
+        cls.comment = Comment.objects.create(
+            text='Тестовый коментарий',
+            author=cls.user,
+            post=cls.post
+        )
+
+    def setUp(self):
+        self.user = CommentCreateTest.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_detail_comment_context(self):
+        """В context шаблона post_detail передан коментарий."""
+        post = CommentCreateTest.post
+        comment = CommentCreateTest.comment
+        response = self.authorized_client.get(reverse('posts:post_detail', kwargs={'post_id': f'{post.pk}'}))
+        first_object = response.context['comments'][0]
+        self.assertEqual(comment.text, first_object.text)
+
+
+class FollowCreateTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.user = User.objects.create_user(username='auth')
+        cls.user1 = User.objects.create_user(username='admin')
+        cls.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='test-slug',
+            description='Тестовое описание',
+        )
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='Тестовая группа',
+            group=cls.group,
+        )
+
+    def setUp(self):
+        self.user = FollowCreateTest.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_follow_unfollow(self):
+        """Подпика оформлена/отменена."""
+        user1 = FollowCreateTest.user1
+        follow_count = user1.following.all().count()
+        response = self.authorized_client.get(reverse('posts:profile_follow',
+                                                      kwargs={'username': f'{user1}'}))
+        self.assertRedirects(response, reverse('posts:profile',
+                                               kwargs={'username': f'{user1}'}))
+
+        self.assertEqual(user1.following.all().count(), follow_count+1)
+        response = self.authorized_client.get(reverse('posts:profile_unfollow',
+                                                      kwargs={'username': f'{user1}'}))
+        self.assertRedirects(response, reverse('posts:profile',
+                                               kwargs={'username': f'{user1}'}))
+        self.assertEqual(user1.following.all().count(), follow_count)

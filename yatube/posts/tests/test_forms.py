@@ -3,7 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 
 from posts.forms import PostForm
-from posts.models import Group, Post
+from posts.models import Group, Post, Comment
 
 from django.urls import reverse
 
@@ -59,7 +59,7 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response, reverse('posts:profile',
-                             kwargs={'username': f'{post.author}'}))
+                                               kwargs={'username': f'{post.author}'}))
         self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertTrue(
             Post.objects.filter(
@@ -80,11 +80,33 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(response, reverse('posts:post_detail',
-                             kwargs={'post_id': f'{post.pk}'}))
+                                               kwargs={'post_id': f'{post.pk}'}))
         self.assertEqual(Post.objects.count(), post_count)
         self.assertTrue(
             Post.objects.filter(
                 text='Отредактированый пост',
                 author=post.author
+            ).exists()
+        )
+
+    def test_add_comment_task(self):
+        post = TaskCreateFormTests.post
+        comment_count = Comment.objects.count()
+        form_data = {
+            'text': 'Тестовый коментарий',
+        }
+        response = self.authorized_client.post(
+            reverse('posts:add_comment', kwargs={'post_id': f'{post.pk}'}),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(response, reverse('posts:post_detail',
+                                               kwargs={'post_id': f'{post.pk}'}))
+        self.assertEqual(Post.objects.count(), comment_count+1)
+        self.assertTrue(
+            Comment.objects.filter(
+                text='Тестовый коментарий',
+                author=post.author,
+                post=post
             ).exists()
         )
