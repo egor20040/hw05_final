@@ -85,7 +85,7 @@ class TaskPagesTests(TestCase):
         """Шаблон index сформирован с правильным контекстом."""
 
         response = self.authorized_client.get(reverse('posts:index'))
-        first_object = response.context['page_obj'][0]
+        first_object = response.context['page_obj'][1]
         self.assertTrue(self.post_object_check(first_object))
 
     def test_group_page_show_correct_context(self):
