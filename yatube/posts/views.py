@@ -3,8 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
-from .forms import PostForm, CommentForm
-from .models import Post, Group, User, Follow
+from posts.forms import PostForm, CommentForm
+from posts.models import Post, Group, User, Follow
 
 
 def index(request):
@@ -181,8 +181,9 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    if author.following.filter(user=request.user).exists():
-        author.following.get(user=request.user).delete()
+    follower = author.following.filter(user=request.user)
+    if follower.exists():
+        follower.delete()
 
     return redirect('posts:profile', username=username)
 

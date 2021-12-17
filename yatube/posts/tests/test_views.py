@@ -390,7 +390,7 @@ class FollowCreateTest(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    def test_follow_unfollow(self):
+    def test_follow(self):
         """Подпика оформлена/отменена."""
         user1 = FollowCreateTest.user1
         follow_count = user1.following.all().count()
@@ -401,6 +401,11 @@ class FollowCreateTest(TestCase):
         self.assertRedirects(response, rvrs)
 
         self.assertEqual(user1.following.all().count(), follow_count + 1)
+
+    def test_unfollow(self):
+        user1 = FollowCreateTest.user1
+        follow_count = user1.following.all().count()
+        rvrs = reverse('posts:profile', kwargs={'username': f'{user1}'})
         rvrs2 = reverse('posts:profile_unfollow',
                         kwargs={'username': f'{user1}'})
         response = self.authorized_client.get(rvrs2)

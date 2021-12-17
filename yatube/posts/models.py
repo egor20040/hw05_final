@@ -79,7 +79,7 @@ class Comment(CreatedModel):
     )
 
     def __str__(self):
-        return self.text
+        return self.text[:15]
 
 
 class Follow(models.Model):
@@ -102,7 +102,7 @@ class Follow(models.Model):
         return f'{self.user} подписан на {self.author}'
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'author'],
-                                    name='unique-in-module')
-        ]
+        constraints = (
+            models.UniqueConstraint(fields=('user', 'author',),
+                                    name='unique-in-module'),
+        )
